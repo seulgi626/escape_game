@@ -129,14 +129,15 @@ function resizeCanvas() {
   const w = Math.round(CFG.W * scale);
   const h = Math.round(CFG.H * scale);
 
-  _dpr = window.devicePixelRatio || 1;
+  // DPR 스케일 제거: iOS Safari에서 DPR×scale 합성 시 이모지가 단색 실루엣으로 렌더링되는 버그 수정
+  _dpr = 1;
   _scale = scale;
 
-  canvas.width = w * _dpr;
-  canvas.height = h * _dpr;
+  canvas.width = w;
+  canvas.height = h;
   canvas.style.width = w + "px";
   canvas.style.height = h + "px";
-  ctx.setTransform(_dpr * _scale, 0, 0, _dpr * _scale, 0, 0);
+  ctx.setTransform(_scale, 0, 0, _scale, 0, 0);
 
   document.getElementById("game-wrap").style.width = w + "px";
   document.getElementById("progress-wrap").style.width = w + "px";
