@@ -32,10 +32,10 @@ const CFG = {
     "도망치는 모습도 귀여워",
   ],
 
-  // ── 캔버스 논리 해상도 (390×440, 세로형 모바일) ────
+  // ── 캔버스 논리 해상도 (390×465, 세로형 모바일) ────
   W: 390,
-  H: 440,
-  GROUND_Y: 352, // 지면 Y (전체 H의 80%)
+  H: 465,
+  GROUND_Y: 375, // 지면 Y (전체 H의 ~80%)
 
   // ── 물리 ────────────────────────────────────────────
   GRAVITY: 1500, // 중력 (px/s²)
@@ -111,20 +111,32 @@ document.title = TITLE;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+let _scale = 1, _dpr = 1;
+
 function resizeCanvas() {
-  // 최대 390px 너비, 화면 비율 유지
   const vw = Math.min(window.innerWidth, 390);
-  const scale = vw / CFG.W; // 390px 기준 1.0, 더 좁으면 축소
+
+  // UI 요소 높이를 제외한 가용 높이 계산 (모바일 클리핑 방지)
+  const titleH = document.getElementById("game-title").offsetHeight || 0;
+  const progH  = document.getElementById("progress-wrap").offsetHeight || 0;
+  const footH  = document.getElementById("footer").offsetHeight || 0;
+  const availH = window.innerHeight - titleH - progH - footH - 8;
+
+  const scaleW = vw / CFG.W;
+  const scaleH = availH / CFG.H;
+  const scale = Math.min(scaleW, scaleH); // 너비·높이 모두 맞도록
+
   const w = Math.round(CFG.W * scale);
   const h = Math.round(CFG.H * scale);
 
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
+  _dpr = window.devicePixelRatio || 1;
+  _scale = scale;
+
+  canvas.width = w * _dpr;
+  canvas.height = h * _dpr;
   canvas.style.width = w + "px";
   canvas.style.height = h + "px";
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.scale(scale * dpr, scale * dpr); // 이후 그리기는 모두 CFG.W×CFG.H 기준
+  ctx.setTransform(_dpr * _scale, 0, 0, _dpr * _scale, 0, 0);
 
   document.getElementById("game-wrap").style.width = w + "px";
   document.getElementById("progress-wrap").style.width = w + "px";
@@ -299,12 +311,12 @@ function _rrect(ctx, x, y, w, h, r) {
    지면 장애물: 🪨 돌, 📑 공부
    공중 장애물: 📱 카톡 (점프해서 넘거나 그냥 달리면 통과)
 
-   ◇ 공중 장애물 Y 범위 계산 (GROUND_Y=352, PSIZE=34, PHH=28)
-     플레이어 서있을 때 hitbox 상단: 352-34+4 = 322
-     점프 정점 hitbox 상단:          322 - 104 = 218 → 하단: 246
-     "점프로 넘기": obs_y > 246+6 = 252  → NAG_Y_MIN: 254
-     "그냥 통과":   obs_y + h < 322      → obs_y < 296 (h=26 기준)
-     → NAG_Y_MIN: 255, NAG_Y_MAX: 292
+   ◇ 공중 장애물 Y 범위 계산 (GROUND_Y=375, PSIZE=34, PHH=28)
+     플레이어 서있을 때 hitbox 상단: 375-34+4 = 345
+     점프 정점 hitbox 상단:          345 - 104 = 241 → 하단: 269
+     "점프로 넘기": obs_y > 269+6 = 275  → NAG_Y_MIN: 277
+     "그냥 통과":   obs_y + h < 345      → obs_y < 319 (h=26 기준)
+     → NAG_Y_MIN: 277, NAG_Y_MAX: 319
 ================================================================ */
 const obstacles = [];
 let nextObsT = 2.0;
@@ -319,7 +331,7 @@ const OBS_TYPES = [
 function spawnObs() {
   const t = OBS_TYPES[Math.floor(Math.random() * OBS_TYPES.length)];
   const y = t.aerial
-    ? 255 + Math.random() * (292 - 255) // 공중 Y 범위
+    ? 277 + Math.random() * (319 - 277) // 공중 Y 범위
     : CFG.GROUND_Y - t.h; // 지면
   obstacles.push({ ...t, x: CFG.W + 10, y });
   nextObsT = CFG.OBS_MIN + Math.random() * (CFG.OBS_MAX - CFG.OBS_MIN);
@@ -546,6 +558,7 @@ function drawBoost() {
 }
 
 function draw(ts) {
+  ctx.setTransform(_dpr * _scale, 0, 0, _dpr * _scale, 0, 0); // 매 프레임 변환 재적용
   ctx.clearRect(0, 0, CFG.W, CFG.H);
   drawBg();
   drawObs();
