@@ -129,15 +129,15 @@ function resizeCanvas() {
   const w = Math.round(CFG.W * scale);
   const h = Math.round(CFG.H * scale);
 
-  // DPR 스케일 제거: iOS Safari에서 DPR×scale 합성 시 이모지가 단색 실루엣으로 렌더링되는 버그 수정
-  _dpr = 1;
+  // DPR 풀 해상도 유지 (화질), 이모지는 identity transform으로 별도 렌더링 (iOS 버그 우회)
+  _dpr = window.devicePixelRatio || 1;
   _scale = scale;
 
-  canvas.width = w;
-  canvas.height = h;
+  canvas.width = w * _dpr;
+  canvas.height = h * _dpr;
   canvas.style.width = w + "px";
   canvas.style.height = h + "px";
-  ctx.setTransform(_scale, 0, 0, _scale, 0, 0);
+  ctx.setTransform(_dpr * _scale, 0, 0, _dpr * _scale, 0, 0);
 
   document.getElementById("game-wrap").style.width = w + "px";
   document.getElementById("progress-wrap").style.width = w + "px";
@@ -195,18 +195,20 @@ const player = {
   },
 
   draw() {
+    const s = _scale * _dpr; // 논리→물리 픽셀 배율
     ctx.save();
-    ctx.font = `${CFG.PSIZE}px serif`;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // iOS: identity transform에서 이모지 렌더링
+    ctx.font = `${CFG.PSIZE * s}px serif`;
     ctx.textBaseline = "top";
-    ctx.fillStyle = "black"; // iOS에서 이모지가 fillStyle 색으로 렌더링되는 버그 방지
+    ctx.fillStyle = "black";
     if (gs.hitFlash > 0)
       ctx.globalAlpha = Math.floor(gs.hitFlash * 12) % 2 ? 1 : 0.2;
     if (!this.onGround) {
-      ctx.translate(this.x + CFG.PSIZE * 0.5, this.y + CFG.PSIZE * 0.5);
+      ctx.translate((this.x + CFG.PSIZE * 0.5) * s, (this.y + CFG.PSIZE * 0.5) * s);
       ctx.rotate(-0.2);
-      ctx.fillText("🦊", -CFG.PSIZE * 0.5, -CFG.PSIZE * 0.5);
+      ctx.fillText("🦊", -CFG.PSIZE * 0.5 * s, -CFG.PSIZE * 0.5 * s);
     } else {
-      ctx.fillText("🦊", this.x, this.y);
+      ctx.fillText("🦊", this.x * s, this.y * s);
     }
     ctx.restore();
   },
@@ -241,14 +243,15 @@ const chaser = {
   draw(time) {
     const bob = Math.sin(time * 2.8 * Math.PI * 2) * 3;
     const y = CFG.GROUND_Y - CFG.CHASER_SIZE + bob;
+    const s = _scale * _dpr;
     ctx.save();
-    ctx.font = `${CFG.CHASER_SIZE}px serif`;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // iOS: identity transform에서 이모지 렌더링
+    ctx.font = `${CFG.CHASER_SIZE * s}px serif`;
     ctx.textBaseline = "top";
-    ctx.fillStyle = "black"; // iOS 이모지 색상 버그 방지
-    ctx.fillText("🧔‍♀️", this.x, y);
-    // 머리 위 작은 하트
-    ctx.font = `14px serif`;
-    ctx.fillText("❤️", this.x - 1, y + CFG.CHASER_SIZE - 30);
+    ctx.fillStyle = "black";
+    ctx.fillText("🧔‍♀️", this.x * s, y * s);
+    ctx.font = `${14 * s}px serif`;
+    ctx.fillText("❤️", (this.x - 1) * s, (y + CFG.CHASER_SIZE - 30) * s);
     ctx.restore();
     if (this.msgT > 0 && this.msgText)
       this._bubble(this.x + CFG.CHASER_SIZE * 0.5, y - 3);
@@ -350,12 +353,14 @@ function updateObs(dt) {
 }
 
 function drawObs() {
+  const s = _scale * _dpr;
   for (const o of obstacles) {
     ctx.save();
-    ctx.font = `${o.h}px serif`;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // iOS: identity transform에서 이모지 렌더링
+    ctx.font = `${o.h * s}px serif`;
     ctx.textBaseline = "top";
-    ctx.fillStyle = "black"; // iOS 이모지 색상 버그 방지
-    ctx.fillText(o.emoji, o.x, o.y);
+    ctx.fillStyle = "black";
+    ctx.fillText(o.emoji, o.x * s, o.y * s);
     ctx.restore();
   }
 }
