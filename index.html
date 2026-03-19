@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>집착광공 탈출</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="game-title"><!-- JS에서 채움 --></div>
+
+    <div id="progress-wrap">
+      <div id="dist-label">탈출까지 <span id="dist-num">1500</span>m 남음!</div>
+      <div id="progress-track">
+        <div id="progress-fill"></div>
+        <span id="progress-icon">🦊</span>
+        <span id="goal-icon">🚩</span>
+      </div>
+    </div>
+
+    <div id="game-wrap">
+      <canvas id="gameCanvas"></canvas>
+      <div id="ui-overlay">
+        <!-- 시작 화면 -->
+        <div id="start-screen" class="screen">
+          <h1 id="start-title">🏃‍♂️💨 탈출 시작!</h1>
+          <p class="sub" id="start-sub">집착광공의 추격을 피해 달려라!</p>
+          <p class="hint">
+            탭 / 스페이스바 → 점프 &nbsp;|&nbsp; 장애물을 피해!
+          </p>
+          <button id="start-btn" class="btn">Game Start</button>
+        </div>
+
+        <!-- 잡힘 -->
+        <div id="caught-screen" class="screen caught-screen" style="display: none">
+          <div class="caught-deco">💗</div>
+          <h1 class="caught-title">드디어 잡았어...!</h1>
+          <p class="caught-msg-text" id="caught-msg">이제 도망 못 가 💕</p>
+          <div class="caught-stats">
+            <span class="caught-stats-label">도망친 거리</span>
+            <span class="caught-stats-val"><span id="caught-dist">0</span>m</span>
+          </div>
+          <button id="retry-btn" class="btn btn-caught">또 도망쳐볼래? 🏃</button>
+        </div>
+
+        <!-- 클리어 -->
+        <div id="win-screen" class="screen win-screen" style="display: none">
+          <div class="win-deco">🚩</div>
+          <h1 class="win-title">탈출 성공!</h1>
+          <p class="win-sub" id="win-sub">휴... 겨우 슬기에게서 탈출했네.</p>
+          <p class="win-sub2">이제 안심하고 선물을 확인해야지!</p>
+          <button id="gift-btn" class="btn btn-gift">선물 확인 💌</button>
+          <div id="gift-box"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer">© 2026 Love Escape - To. Junseo</div>
+
+    <script src="game.js"></script>
+  </body>
+</html>
