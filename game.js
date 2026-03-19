@@ -197,6 +197,7 @@ const player = {
     ctx.save();
     ctx.font = `${CFG.PSIZE}px serif`;
     ctx.textBaseline = "top";
+    ctx.fillStyle = "black"; // iOS에서 이모지가 fillStyle 색으로 렌더링되는 버그 방지
     if (gs.hitFlash > 0)
       ctx.globalAlpha = Math.floor(gs.hitFlash * 12) % 2 ? 1 : 0.2;
     if (!this.onGround) {
@@ -242,6 +243,7 @@ const chaser = {
     ctx.save();
     ctx.font = `${CFG.CHASER_SIZE}px serif`;
     ctx.textBaseline = "top";
+    ctx.fillStyle = "black"; // iOS 이모지 색상 버그 방지
     ctx.fillText("🧔‍♀️", this.x, y);
     // 머리 위 작은 하트
     ctx.font = `14px serif`;
@@ -351,6 +353,7 @@ function drawObs() {
     ctx.save();
     ctx.font = `${o.h}px serif`;
     ctx.textBaseline = "top";
+    ctx.fillStyle = "black"; // iOS 이모지 색상 버그 방지
     ctx.fillText(o.emoji, o.x, o.y);
     ctx.restore();
   }
